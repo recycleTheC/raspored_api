@@ -8,6 +8,11 @@ const config = require("config");
 const User = require("../models/User");
 const { genSalt } = require("bcryptjs");
 
+/**
+ * @todo User Authentication Errors
+ * @body Send different message `id` along with `msg` when there is an error while authenticating user.
+ */
+
 // @route     POST api/users
 // @desc      Register a user
 // @access    Public
