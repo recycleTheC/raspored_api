@@ -12,6 +12,10 @@ var ScheduleSchema = Schema({
   },
   classes: [
     {
+      id: {
+        type: Number,
+        required: true,
+      },
       class: {
         type: Schema.Types.ObjectId,
         ref: "classes",
