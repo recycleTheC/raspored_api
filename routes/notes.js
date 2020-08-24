@@ -38,7 +38,15 @@ router.post(
 
       const _note = await newNote.save();
 
-      res.json(_note);
+      if (_note) {
+        let notes = await Notes.find({
+          date: date,
+        });
+
+        if (!notes) return res.json({ msg: "Biljeske nisu pronadjene" });
+
+        res.json(notes); // Return all notes for simplicity
+      }
     } catch (err) {
       console.error(err.message);
       res.status(500).send("Server Error");
@@ -66,6 +74,35 @@ router.get("/:date", async (req, res) => {
     if (!notes) return res.json({ msg: "Biljeske nisu pronadjene" });
 
     res.json(notes);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route    DELETE api/notes/:id
+// @desc     Delete note
+// @access   Private
+
+router.delete("/:id", auth, async (req, res) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    let notesToDelete = await Notes.find({
+      _id: req.params.id,
+    });
+
+    if (!notesToDelete) return res.json({ msg: "Biljeska nije pronadjena" });
+
+    const deleted = await Notes.findOneAndDelete({
+      _id: req.params.id,
+    });
+
+    res.json({ msg: "Biljeska uspjesno uklonjena" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
