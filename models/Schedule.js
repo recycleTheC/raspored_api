@@ -17,7 +17,7 @@ var ScheduleSchema = Schema({
         required: true,
       },
       class: {
-        type: Schema.Types.ObjectId,
+        type: [Schema.Types.ObjectId],
         ref: "classes",
       },
       timeStart: {
