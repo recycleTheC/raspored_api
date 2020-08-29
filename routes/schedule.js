@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
+const { getWeek, format, parseISO } = require("date-fns");
+const locale = require("date-fns/locale/hr");
 
 const Schedule = require("../models/Schedule");
 
@@ -52,11 +54,11 @@ router.post(
   }
 );
 
-// @route    GET api/schedule/:week/:day
+// @route    GET api/schedule/:date
 // @desc     Get daily schedule
 // @access   Public
 
-router.get("/:week/:day", async (req, res) => {
+router.get("/:date", async (req, res) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -64,9 +66,13 @@ router.get("/:week/:day", async (req, res) => {
   }
 
   try {
+    const date = new Date(req.params.date);
+    const week = getWeek(date) % 2 === 0 ? "parni" : "neparni";
+    const day = format(date, "eeee", { locale, weekStartsOn: 2 });
+
     let schedule = await Schedule.findOne({
-      week: req.params.week,
-      day: req.params.day,
+      week: week,
+      day: day,
     }).populate({
       path: "classes.class",
       model: "classes",
