@@ -2,6 +2,8 @@
 
 Node/Express/MongoDB REST API for class schedule that uses JWT authentication.
 
+[![Known Vulnerabilities](https://snyk.io/test/github/recycleTheC/raspored_api/badge.svg?targetFile=package.json)](https://snyk.io/test/github/recycleTheC/raspored_api?targetFile=package.json)
+
 ## Getting Started
 
 ```
