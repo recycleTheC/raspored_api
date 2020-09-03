@@ -92,20 +92,66 @@ router.delete("/:id", auth, async (req, res) => {
   }
 
   try {
-    let notesToDelete = await Notes.find({
+    let noteToDelete = await Notes.findOne({
       _id: req.params.id,
     });
 
-    if (!notesToDelete) return res.json({ msg: "Biljeska nije pronadjena" });
+    if (!noteToDelete) return res.json({ msg: "Biljeska nije pronadjena" });
+
+    const date = noteToDelete.date;
 
     const deleted = await Notes.findOneAndDelete({
       _id: req.params.id,
     });
 
-    res.json({ msg: "Biljeska uspjesno uklonjena" });
+    let notes = await Notes.find({
+      date: date,
+    });
+
+    if (!notes) return res.json({ msg: "Biljeske nisu pronadjene" });
+
+    res.json(notes);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
+  }
+});
+
+// @route    PUT api/notes/:id
+// @desc     Update note
+// @access   Private
+
+router.put("/:id", auth, async (req, res) => {
+  const { note, date, classKey, classId } = req.body;
+
+  // Build contact object
+  const noteFields = {};
+  if (note) noteFields.note = note;
+  if (date) noteFields.date = date;
+  if (classKey) noteFields.classKey = classKey;
+  if (classId) noteFields.classId = classId;
+
+  try {
+    let update = await Notes.findById(req.params.id);
+
+    if (!update) {
+      return res.status(404).json({ msg: "Bilješka nije pronađena" });
+    }
+
+    update = await Notes.findByIdAndUpdate(req.params.id, noteFields, {
+      new: true,
+    });
+
+    let notes = await Notes.find({
+      date: update.date,
+    });
+
+    if (!notes) return res.json({ msg: "Bilješke nisu pronađene" });
+
+    return res.json(notes);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
   }
 });
 
