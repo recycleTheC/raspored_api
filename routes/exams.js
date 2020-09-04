@@ -41,7 +41,7 @@ router.post(
       if (exam) {
         let exams = await Exams.find({
           date: date,
-        });
+        }).populate({ path: "classKey", model: "classes", select: "name" });
 
         if (!exams) return res.json({ msg: "Ispiti nisu pronađeni" });
 
