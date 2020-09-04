@@ -39,6 +39,7 @@ app.use("/api/schedule", require("./routes/schedule"));
 app.use("/api/teacher", require("./routes/teacher"));
 app.use("/api/notes", require("./routes/notes"));
 app.use("/api/class", require("./routes/classes"));
+app.use("/api/exam", require("./routes/exams"));
 
 const PORT = process.env.PORT || 5000;
 
