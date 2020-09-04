@@ -45,7 +45,7 @@ router.post(
 
         if (!exams) return res.json({ msg: "Ispiti nisu pronađeni" });
 
-        res.json(exams); // Return all notes for simplicity
+        res.json(exams); // Return all exams for simplicity
       }
     } catch (err) {
       console.error(err.message);
@@ -105,11 +105,11 @@ router.delete("/:id", auth, async (req, res) => {
 
     let exams = await Exams.find({
       date: date,
-    });
+    }).populate({ path: "classKey", model: "classes", select: "name" });
 
     if (!exams) return res.json({ msg: "Ispiti nisu pronađeni" });
 
-    res.json(exams);
+    return res.json(exams);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -121,17 +121,18 @@ router.delete("/:id", auth, async (req, res) => {
 // @access   Private
 
 router.put("/:id", auth, async (req, res) => {
-  const { content, date, classKey, classId } = req.body;
+  const { content, classKey, classId } = req.body;
 
   // Build contact object
   const examFields = {};
-  if (content) examFields.content = note;
-  if (date) examFields.date = date;
+  if (content) examFields.content = content;
   if (classKey) examFields.classKey = classKey;
   if (classId) examFields.classId = classId;
 
   try {
     let update = await Exams.findById(req.params.id);
+
+    const date = update.date;
 
     if (!update) {
       return res.status(404).json({ msg: "Ispit nije pronađen" });
@@ -142,8 +143,8 @@ router.put("/:id", auth, async (req, res) => {
     });
 
     let exams = await Exams.find({
-      date: update.date,
-    });
+      date: date,
+    }).populate({ path: "classKey", model: "classes", select: "name" });
 
     if (!exams) return res.json({ msg: "Ispiti nisu pronađeni" });
 
