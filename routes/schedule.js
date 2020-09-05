@@ -25,6 +25,8 @@ router.post(
         "nedjelja",
       ]),
       body("week").isIn(["parni", "neparni"]),
+      body("validFrom").notEmpty(),
+      body("validUntil").notEmpty(),
     ],
   ],
   async (req, res) => {
@@ -33,14 +35,14 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { day, week, classes } = req.body;
-
-    console.log(req.body);
+    const { day, week, classes, validFrom, validUntil } = req.body;
 
     try {
       const newSchedule = new Schedule({
         week,
         day,
+        validFrom,
+        validUntil,
         classes,
       });
 
@@ -73,6 +75,12 @@ router.get("/:date", async (req, res) => {
     let schedule = await Schedule.findOne({
       week: week,
       day: day,
+      validFrom: {
+        $lte: date,
+      },
+      validUntil: {
+        $gte: date,
+      },
     }).populate({
       path: "classes.class",
       model: "classes",

@@ -10,6 +10,14 @@ var ScheduleSchema = Schema({
     type: String,
     required: true,
   },
+  validFrom: {
+    type: Date,
+    required: true,
+  },
+  validUntil: {
+    type: Date,
+    required: true,
+  },
   classes: [
     {
       id: {
