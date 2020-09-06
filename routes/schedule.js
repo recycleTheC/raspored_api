@@ -21,6 +21,7 @@ router.post(
         "utorak",
         "srijeda",
         "četvrtak",
+        "petak",
         "subota",
         "nedjelja",
       ]),
