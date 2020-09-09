@@ -14,7 +14,7 @@ const NotesSchema = new Schema({
   classKey: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "class",
+    ref: "classes",
   },
   note: {
     type: String,

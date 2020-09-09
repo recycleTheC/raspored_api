@@ -14,7 +14,7 @@ const ExamsScheme = new Schema({
   classKey: {
     type: Schema.Types.ObjectId,
     required: true,
-    ref: "class",
+    ref: "classes",
   },
   content: {
     type: String,
