@@ -37,7 +37,7 @@ router.post(
 				}).populate({
 					path: 'substitution',
 					model: 'classes',
-					select: 'name',
+					select: 'name type',
 					populate: { path: 'teacher', model: 'teacher', select: 'name' },
 				});
 
@@ -69,7 +69,7 @@ router.get('/:date', async (req, res) => {
 		}).populate({
 			path: 'substitution',
 			model: 'classes',
-			select: 'name',
+			select: 'name type',
 			populate: { path: 'teacher', model: 'teacher', select: 'name' },
 		});
 
@@ -109,7 +109,7 @@ router.delete('/:id', auth, async (req, res) => {
 		}).populate({
 			path: 'substitution',
 			model: 'classes',
-			select: 'name',
+			select: 'name type',
 			populate: { path: 'teacher', model: 'teacher', select: 'name' },
 		});
 
@@ -151,7 +151,7 @@ router.put('/:id', auth, async (req, res) => {
 		}).populate({
 			path: 'substitution',
 			model: 'classes',
-			select: 'name',
+			select: 'name type',
 			populate: { path: 'teacher', model: 'teacher', select: 'name' },
 		});
 
