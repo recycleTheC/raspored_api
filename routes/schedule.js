@@ -93,7 +93,7 @@ router.get('/:date', async (req, res) => {
 			});
 
 		if (!schedule) return res.json({ msg: 'Raspored nije pronađen' });
-		console.log(schedule.classes.length);
+
 		if (schedule.status && schedule.classes.length === 0)
 			return res.status(424).send(schedule);
 
