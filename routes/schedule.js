@@ -36,7 +36,7 @@ router.post(
 			return res.status(400).json({ errors: errors.array() });
 		}
 
-		const { day, week, classes, validFrom, validUntil } = req.body;
+		const { day, week, classes, validFrom, validUntil, status } = req.body;
 
 		try {
 			const newSchedule = new Schedule({
@@ -45,6 +45,7 @@ router.post(
 				validFrom,
 				validUntil,
 				classes,
+				status,
 			});
 
 			const schedule = await newSchedule.save();
@@ -82,14 +83,19 @@ router.get('/:date', async (req, res) => {
 			validUntil: {
 				$gte: date,
 			},
-		}).populate({
-			path: 'classes.class',
-			model: 'classes',
-			select: 'name type',
-			populate: { path: 'teacher', model: 'teacher', select: 'name' },
-		});
+		})
+			.sort({ validUntil: 1 })
+			.populate({
+				path: 'classes.class',
+				model: 'classes',
+				select: 'name type',
+				populate: { path: 'teacher', model: 'teacher', select: 'name' },
+			});
 
 		if (!schedule) return res.json({ msg: 'Raspored nije pronađen' });
+		console.log(schedule.classes.length);
+		if (schedule.status && schedule.classes.length === 0)
+			return res.status(424).send(schedule);
 
 		res.json(schedule.classes);
 	} catch (err) {
