@@ -155,11 +155,11 @@ router.put('/:id', auth, async (req, res) => {
 	}
 });
 
-// @route    GET api/notes/class/:classId
+// @route    GET api/notes/class/:id
 // @desc     Get notes for one class
 // @access   Public
 
-router.get('/class/:classId', async (req, res) => {
+router.get('/class/:id', async (req, res) => {
 	const errors = validationResult(req);
 
 	if (!errors.isEmpty()) {
@@ -168,7 +168,7 @@ router.get('/class/:classId', async (req, res) => {
 
 	try {
 		let notes = await Notes.find({
-			classKey: req.params.classId,
+			classKey: req.params.id,
 		});
 
 		if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
