@@ -6,6 +6,7 @@ const { getWeek, format, parseISO } = require('date-fns');
 const locale = require('date-fns/locale/hr');
 
 const Schedule = require('../models/Schedule');
+const Breaks = require('../models/Breaks');
 
 // @route    POST api/schedule
 // @desc     Create a schedule
@@ -92,15 +93,31 @@ router.get('/:date', async (req, res) => {
 				populate: { path: 'teacher', model: 'teacher', select: 'name' },
 			});
 
-		if (!schedule) return res.json({ msg: 'Raspored nije pronađen' });
+		let breaks = await Breaks.findOne({
+			validFrom: {
+				$lte: date,
+			},
+			validUntil: {
+				$gte: date,
+			},
+		});
 
-		if (schedule.status && schedule.classes.length === 0)
-			return res.status(424).send(schedule);
+		if (!schedule && !breaks)
+			return res.json({ msg: 'Raspored nije pronađen' });
 
-		res.json(schedule.classes);
+		if (breaks) {
+			const content = {
+				classes: [],
+				status: breaks.status,
+				options: breaks.options,
+			};
+			return res.status(424).send(content);
+		}
+
+		return res.send(schedule.classes);
 	} catch (err) {
 		console.error(err.message);
-		res.status(500).send('Server error');
+		return res.status(500).send('Server error');
 	}
 });
 

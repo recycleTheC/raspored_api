@@ -9,6 +9,25 @@ const Changes = require('../models/Changes');
 // @desc     Create a change in schedule
 // @access   Private
 
+async function getChanges(date) {
+	let data = await Changes.find({
+		date: date,
+	})
+		.populate({
+			path: 'substitution',
+			model: 'classes',
+			select: 'name type',
+			populate: { path: 'teacher', model: 'teacher', select: 'name' },
+		})
+		.populate({
+			path: 'changed',
+			model: 'classes',
+			select: 'name',
+		});
+
+	return data;
+}
+
 router.post(
 	'/',
 	[auth, [body('date').not().isEmpty(), body('classId').not().isEmpty()]],
@@ -32,14 +51,7 @@ router.post(
 			const change = await newChange.save();
 
 			if (change) {
-				let changes = await Changes.find({
-					date: date,
-				}).populate({
-					path: 'substitution',
-					model: 'classes',
-					select: 'name type',
-					populate: { path: 'teacher', model: 'teacher', select: 'name' },
-				});
+				let changes = await getChanges(date);
 
 				if (!changes) return res.json({ msg: 'Izmjene nisu pronadjene' });
 
@@ -64,14 +76,7 @@ router.get('/:date', async (req, res) => {
 	}
 
 	try {
-		let changes = await Changes.find({
-			date: req.params.date,
-		}).populate({
-			path: 'substitution',
-			model: 'classes',
-			select: 'name type',
-			populate: { path: 'teacher', model: 'teacher', select: 'name' },
-		});
+		let changes = await getChanges(req.params.date);
 
 		if (!changes) return res.json({ msg: 'Izmjene nisu pronadjene' });
 
@@ -104,14 +109,7 @@ router.delete('/:id', auth, async (req, res) => {
 			_id: req.params.id,
 		});
 
-		let changes = await Changes.find({
-			date: date,
-		}).populate({
-			path: 'substitution',
-			model: 'classes',
-			select: 'name type',
-			populate: { path: 'teacher', model: 'teacher', select: 'name' },
-		});
+		let changes = await getChanges(date);
 
 		if (!changes) return res.json({ msg: 'Izmjene nisu pronadjene' });
 
@@ -146,14 +144,7 @@ router.put('/:id', auth, async (req, res) => {
 			new: true,
 		});
 
-		let changes = await Changes.find({
-			date: update.date,
-		}).populate({
-			path: 'substitution',
-			model: 'classes',
-			select: 'name type',
-			populate: { path: 'teacher', model: 'teacher', select: 'name' },
-		});
+		let changes = await getChanges(update.date);
 
 		if (!changes) return res.json({ msg: 'Bilješke nisu pronađene' });
 
