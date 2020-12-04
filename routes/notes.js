@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 const Notes = require('../models/Notes');
 
 // @route    POST api/notes
-// @desc     Create a schedule
+// @desc     Create a note
 // @access   Private
 
 router.post(
