@@ -10,7 +10,7 @@ const Notifications = require('../models/Notifications');
 // @access   Private
 
 async function getNotifications(date) {
-	let data = await Notifications.findOne({
+	let data = await Notifications.find({
 		fromDate: {
 			$lte: date,
 		},
@@ -76,7 +76,6 @@ router.get('/day/:date', async (req, res) => {
 		let notifications = await getNotifications(req.params.date);
 
 		if (notifications) res.json(notifications);
-		else return res.send({});
 	} catch (err) {
 		console.error(err.message);
 		res.status(500).send('Server error');
@@ -98,7 +97,6 @@ router.get('/all', async (req, res) => {
 		let notifications = await Notifications.find();
 
 		if (notifications) res.json(notifications);
-		else return res.send({});
 	} catch (err) {
 		console.error(err.message);
 		res.status(500).send('Server error');
@@ -120,7 +118,6 @@ router.get('/id/:id', async (req, res) => {
 		let notifications = await Notifications.findOne({ _id: req.params.id });
 
 		if (notifications) res.json(notifications);
-		else return res.send({});
 	} catch (err) {
 		console.error(err.message);
 		res.status(500).send('Server error');
