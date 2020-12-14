@@ -58,7 +58,7 @@ router.post(
 // @desc     Get daily exams
 // @access   Public
 
-router.get('/:date', async (req, res) => {
+router.get('/date/:date', async (req, res) => {
 	const errors = validationResult(req);
 
 	if (!errors.isEmpty()) {
@@ -170,6 +170,29 @@ router.get('/class/:id', async (req, res) => {
 		let exams = await Exams.find({
 			classKey: req.params.id,
 		}).populate({ path: 'classKey', model: 'classes', select: 'name' });
+
+		if (!exams) return res.status(404).json({ msg: 'Ispiti nisu pronađeni' });
+
+		res.json(exams);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server error');
+	}
+});
+
+router.get('/all/', async (req, res) => {
+	const errors = validationResult(req);
+
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+
+	try {
+		let exams = await Exams.find().populate({
+			path: 'classKey',
+			model: 'classes',
+			select: 'name',
+		});
 
 		if (!exams) return res.status(404).json({ msg: 'Ispiti nisu pronađeni' });
 
