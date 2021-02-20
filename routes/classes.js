@@ -85,8 +85,8 @@ router.get('/:date/:id', async (req, res) => {
 
 		const id = req.params.id;
 		const fromDate = new Date(req.params.date);
-		const maxDays = 14; // define max number of days that schedule will be checked
-		var currentDate = fromDate;
+		const maxDays = 31; // define max number of days that schedule will be checked
+		var currentDate = addBusinessDays(fromDate, 1);
 		var availableDates = [];
 
 		for (var i = 0; i < maxDays; i++) {
@@ -107,12 +107,6 @@ router.get('/:date/:id', async (req, res) => {
 			if (schedule) {
 				let result = false;
 				let classId = null;
-
-				// Something is wrong here, but it works at this state
-
-				/**
-				 * @todo Reimplement function for getting dates when the class is attended
-				 */
 
 				const search = (item, time) => {
 					if (item == id) {

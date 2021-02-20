@@ -5,6 +5,13 @@ const auth = require('../middleware/auth');
 
 const Notes = require('../models/Notes');
 
+async function getNotes(date) {
+	const result = Notes.find({
+		$or: [{ date: date }, { reminder: date }],
+	});
+	return result;
+}
+
 // @route    POST api/notes
 // @desc     Create a note
 // @access   Private
@@ -26,7 +33,7 @@ router.post(
 			return res.status(400).json({ errors: errors.array() });
 		}
 
-		const { date, note, classId, classKey } = req.body;
+		const { date, note, classId, classKey, reminder, title, hidden } = req.body;
 
 		try {
 			const newNote = new Notes({
@@ -36,12 +43,14 @@ router.post(
 				classKey,
 			});
 
+			if (reminder) newNote.reminder = reminder;
+			if (title) newNote.title = title;
+			if (hidden) newNote.hidden = hidden;
+
 			const _note = await newNote.save();
 
 			if (_note) {
-				let notes = await Notes.find({
-					date: date,
-				});
+				let notes = await getNotes(date);
 
 				if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
 
@@ -66,9 +75,7 @@ router.get('/:date', async (req, res) => {
 	}
 
 	try {
-		let notes = await Notes.find({
-			date: req.params.date,
-		});
+		let notes = await getNotes(req.params.date);
 
 		//if (!schedule) return res.status(404).json({ msg: "Schedule not found" });
 		if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
@@ -104,9 +111,7 @@ router.delete('/:id', auth, async (req, res) => {
 			_id: req.params.id,
 		});
 
-		let notes = await Notes.find({
-			date: date,
-		});
+		let notes = await getNotes(date);
 
 		if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
 
@@ -122,7 +127,7 @@ router.delete('/:id', auth, async (req, res) => {
 // @access   Private
 
 router.put('/:id', auth, async (req, res) => {
-	const { note, date, classKey, classId } = req.body;
+	const { note, date, classKey, classId, title, reminder, hidden } = req.body;
 
 	// Build contact object
 	const noteFields = {};
@@ -130,6 +135,9 @@ router.put('/:id', auth, async (req, res) => {
 	if (date) noteFields.date = date;
 	if (classKey) noteFields.classKey = classKey;
 	if (classId) noteFields.classId = classId;
+	if (title) noteFields.title = title;
+	if (reminder) noteFields.reminder = reminder;
+	if (hidden) noteFields.hidden = hidden;
 
 	try {
 		let update = await Notes.findById(req.params.id);
@@ -142,9 +150,7 @@ router.put('/:id', auth, async (req, res) => {
 			new: true,
 		});
 
-		let notes = await Notes.find({
-			date: update.date,
-		});
+		let notes = await getNotes(update.date);
 
 		if (!notes) return res.json({ msg: 'Bilješke nisu pronađene' });
 
