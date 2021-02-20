@@ -136,8 +136,12 @@ router.put('/:id', auth, async (req, res) => {
 	if (classKey) noteFields.classKey = classKey;
 	if (classId) noteFields.classId = classId;
 	if (title) noteFields.title = title;
+
 	if (reminder) noteFields.reminder = reminder;
+	else noteFields.reminder = null;
+
 	if (hidden) noteFields.hidden = hidden;
+	else noteFields.hidden = false;
 
 	try {
 		let update = await Notes.findById(req.params.id);
