@@ -1,0 +1,39 @@
+<h1>Tjedne obaveze od {{fromDate}} do {{toDate}} </h1>
+
+<h2>Ispiti</h2>
+
+{{#if exams}}
+
+<ul>
+  {{#each exams as |item|}}
+  {{#with item}}
+  <li>
+    {{dateFromat date}} - {{classKey.name}} ({{classId}}. sat) - {{content}}
+  </li>
+  {{/with}}
+  {{/each}}
+</ul>
+
+{{else}}
+<h3>Nema upisanih ispita 🎉</h3>
+{{/if}}
+
+<hr>
+
+<h2>Obaveze, ispitivanja, domaće zadaće</h2>
+
+{{#if notes}}
+
+<ul>
+  {{#each notes as |item|}}
+  {{#with item}}
+  <li>
+    {{dateFromat reminder}} - {{classKey.name}} - {{title}} - {{{markdown note}}}
+  </li>
+  {{/with}}
+  {{/each}}
+</ul>
+
+{{else}}
+<h3>Nema upisanih bilješki 🎉</h3>
+{{/if}}

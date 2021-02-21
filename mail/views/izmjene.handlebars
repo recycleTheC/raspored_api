@@ -1,0 +1,40 @@
+<h1>Izmjene u rasporedu za {{date}} </h1>
+
+<ul>
+  {{#each changes as |item|}}
+  {{#with item}}
+  <li>
+    {{classId}}. sat
+
+    {{#if item.changed}}
+
+    {{#if (eq item.substitution.name "/")}}
+    - <span class="changed">{{item.changed.name}}</span>
+    {{else}}
+
+    - <strong>{{item.substitution.name}}</strong>
+    (<span class="changed">{{item.changed.name}}</span>)
+
+    {{/if}}
+
+    {{/if}}
+
+    {{#if item.regular}}
+
+    - {{item.regular}}
+
+    {{else}}
+
+    {{#if (neq item.location '-')}}
+
+    {{#if item.location}}
+    - {{item.location}}
+    {{/if}}
+
+    {{/if}}
+    {{/if}}
+
+  </li>
+  {{/with}}
+  {{/each}}
+</ul>
