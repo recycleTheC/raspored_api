@@ -1,10 +1,12 @@
 const express = require('express');
+const cron = require('node-cron');
 const connectDB = require('./config/db');
 
 const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const mail = require('./mail');
 
 // Connect Database
 connectDB();
@@ -43,6 +45,35 @@ app.use('/api/exam', require('./routes/exams'));
 app.use('/api/changes', require('./routes/changes'));
 app.use('/api/breaks', require('./routes/breaks'));
 app.use('/api/notifications', require('./routes/notifications'));
+
+cron.schedule(
+	'00 12 * * sat',
+	async () => {
+		try {
+			const update = await mail.weeklyUpdate();
+		} catch (error) {
+			console.error('Error sending emails', error);
+		}
+	},
+	{
+		timezone: 'Europe/Zagreb',
+	}
+);
+
+cron.schedule(
+	'00 15 * * sun-frid',
+	async () => {
+		try {
+			const update = await mail.changesUpdate();
+			console.log(update);
+		} catch (error) {
+			console.error('Error sending emails', error);
+		}
+	},
+	{
+		timezone: 'Europe/Zagreb',
+	}
+);
 
 const PORT = process.env.PORT || 5000;
 
