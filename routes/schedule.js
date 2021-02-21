@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const auth = require('../middleware/auth');
-const { getWeek, format, parseISO } = require('date-fns');
+const { getWeek, format } = require('date-fns');
 const locale = require('date-fns/locale/hr');
 
 const Schedule = require('../models/Schedule');
