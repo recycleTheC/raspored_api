@@ -1,0 +1,13 @@
+<h1>Ispiti za sutra {{date}}</h1>
+
+<ul>
+  {{#each exams as |item|}}
+  {{#with item}}
+  <li>
+    <h2>
+      {{classKey.name}} ({{classId}}. sat) - {{content}}
+    </h2>
+  </li>
+  {{/with}}
+  {{/each}}
+</ul>

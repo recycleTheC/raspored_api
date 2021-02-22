@@ -182,46 +182,80 @@ exports.changesUpdate = async () => {
 		const changes = await getChanges(date);
 		const schedule = await getSchedule(date);
 
-		if (changes) {
-			const receivers = await User.find({
-				subscription: 'changes',
-			})
-				.select('email')
-				.then((users) => users.map((user) => user.email));
+		if (changes.length < 1) return "No daily changes! Didn't send anything.";
 
-			for (let i = 0; i < changes.length; i++) {
-				if (!changes[i].substitution) {
-					const regular = schedule.find((x) => x.id === changes[i].classId)
-						.class;
+		const receivers = await User.find({
+			subscription: 'changes',
+		})
+			.select('email')
+			.then((users) => users.map((user) => user.email));
 
-					const locations = changes[i].location.split(' / ');
-					let strings = [];
+		for (let i = 0; i < changes.length; i++) {
+			if (!changes[i].substitution) {
+				const regular = schedule.find((x) => x.id === changes[i].classId).class;
 
-					regular.forEach((item, n) => {
-						strings.push(`${item.name} (${locations[n]})`);
-					});
+				const locations = changes[i].location.split(' / ');
+				let strings = [];
 
-					changes[i].regular = strings.reduce((m, n) => `${m} / ${n}`);
-				}
-			}
-
-			receivers.forEach(async (receiver) => {
-				let info = await transporter.sendMail({
-					from: 'Raspored <raspored@dev-mario.xyz>',
-					to: receiver,
-					subject: `Izmjene u rasporedu za ${format(date, 'dd.MM.yyyy.')}`,
-					template: 'izmjene',
-					context: {
-						time: new Date().toUTCString(),
-						date: format(date, 'dd.MM.yyyy. (eeee)', { locale }),
-						changes: changes,
-					},
+				regular.forEach((item, n) => {
+					strings.push(`${item.name} (${locations[n]})`);
 				});
-				console.log(info.messageId);
-			});
 
-			return 'Daily changes sent sucessfully';
+				changes[i].regular = strings.reduce((m, n) => `${m} / ${n}`);
+			}
 		}
+
+		receivers.forEach(async (receiver) => {
+			let info = await transporter.sendMail({
+				from: 'Raspored <raspored@dev-mario.xyz>',
+				to: receiver,
+				subject: `Izmjene u rasporedu za ${format(date, 'dd.MM.yyyy.')}`,
+				template: 'izmjene',
+				context: {
+					time: new Date().toUTCString(),
+					date: format(date, 'dd.MM.yyyy. (eeee)', { locale }),
+					changes: changes,
+				},
+			});
+			console.log(info.messageId);
+		});
+
+		return 'Daily changes sent sucessfully';
+	} catch (error) {
+		console.error(error);
+	}
+};
+
+exports.dailyExams = async () => {
+	const date = addBusinessDays(new Date('2021-02-23').setHours(1, 0, 0, 0), 1);
+
+	try {
+		const exams = await getExams(date, date);
+
+		if (exams.length < 1) return "No daily exams! Didn't send anything...";
+
+		const receivers = await User.find({
+			subscription: 'exams',
+		})
+			.select('email')
+			.then((users) => users.map((user) => user.email));
+
+		receivers.forEach(async (receiver) => {
+			let info = await transporter.sendMail({
+				from: 'Raspored <raspored@dev-mario.xyz>',
+				to: receiver,
+				subject: `Ispiti ${format(date, 'dd.MM.yyyy')}`,
+				template: 'ispiti',
+				context: {
+					time: new Date().toUTCString(),
+					date: format(date, 'dd.MM.'),
+					exams: exams,
+				},
+			});
+			console.log(info.messageId);
+		});
+
+		return 'Daily exams sent sucessfully';
 	} catch (error) {
 		console.error(error);
 	}

@@ -75,6 +75,21 @@ cron.schedule(
 	}
 );
 
+cron.schedule(
+	'00 15 * * mon-thu',
+	async () => {
+		try {
+			const update = await mail.dailyExams();
+			console.log(update);
+		} catch (error) {
+			console.error('Error sending emails', error);
+		}
+	},
+	{
+		timezone: 'Europe/Zagreb',
+	}
+);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
