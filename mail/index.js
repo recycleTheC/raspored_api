@@ -227,7 +227,7 @@ exports.changesUpdate = async () => {
 };
 
 exports.dailyExams = async () => {
-	const date = addBusinessDays(new Date().setHours(1, 0, 0, 0), 1);
+	const date = addBusinessDays(new Date().setHours(0, 0, 0, 0), 1);
 
 	try {
 		const exams = await getExams(date, date);
