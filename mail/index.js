@@ -176,7 +176,7 @@ exports.weeklyUpdate = async () => {
 };
 
 exports.changesUpdate = async () => {
-	const date = addBusinessDays(new Date().setHours(1, 0, 0, 0), 1);
+	const date = addBusinessDays(new Date().setHours(0, 0, 0, 0), 1);
 
 	try {
 		const changes = await getChanges(date);
