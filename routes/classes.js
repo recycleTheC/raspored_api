@@ -5,8 +5,10 @@ const auth = require('../middleware/auth');
 
 const Classes = require('../models/Classes');
 const Schedule = require('../models/Schedule');
-const { addBusinessDays, format, getWeek } = require('date-fns');
+const Breaks = require('../models/Breaks');
+const { addDays, format, getWeek, setHours } = require('date-fns');
 const locale = require('date-fns/locale/hr');
+const { get } = require('mongoose');
 
 // @route    POST api/class
 // @desc     Create a class
@@ -84,14 +86,14 @@ router.get('/:date/:id', async (req, res) => {
 		if (!findClass) return res.json({ msg: 'Predmeti nisu pronadjeni' });
 
 		const id = req.params.id;
-		const fromDate = new Date(req.params.date);
-		const maxDays = 31; // define max number of days that schedule will be checked
-		var currentDate = addBusinessDays(fromDate, 1);
-		var availableDates = [];
+		const fromDate = setHours(new Date(req.params.date), 2);
+		const maxDays = 45; // define max number of days that schedule will be checked
+		let availableDates = [];
 
-		for (var i = 0; i < maxDays; i++) {
-			var week = getWeek(currentDate) % 2 === 0 ? 'parni' : 'neparni';
-			var day = format(currentDate, 'eeee', { locale, weekStartsOn: 2 });
+		for (let i = 1; i <= maxDays; i++) {
+			let currentDate = addDays(fromDate, i);
+			let week = getWeek(currentDate) % 2 === 0 ? 'parni' : 'neparni';
+			let day = format(currentDate, 'eeee', { locale, weekStartsOn: 2 });
 
 			let schedule = await Schedule.findOne({
 				week: week,
@@ -104,7 +106,16 @@ router.get('/:date/:id', async (req, res) => {
 				},
 			});
 
-			if (schedule) {
+			let onBreak = await Breaks.findOne({
+				validFrom: {
+					$lte: currentDate,
+				},
+				validUntil: {
+					$gte: currentDate,
+				},
+			});
+
+			if (schedule && onBreak === null) {
 				let result = false;
 				let classId = null;
 
@@ -125,7 +136,6 @@ router.get('/:date/:id', async (req, res) => {
 					availableDates.push({ date: currentDate, id: classId });
 				}
 			}
-			currentDate = addBusinessDays(currentDate, 1);
 		}
 
 		res.json(availableDates);
