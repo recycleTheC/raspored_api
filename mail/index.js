@@ -10,7 +10,7 @@ const Notes = require('../models/Notes');
 const Exams = require('../models/Exams');
 const Changes = require('../models/Changes');
 const Schedule = require('../models/Schedule');
-const User = require('../models/User');
+const Subscriber = require('../models/Subscriber');
 
 async function getNotes(from, to) {
 	const result = await Notes.find({
@@ -79,6 +79,16 @@ async function getChanges(date) {
 	return result;
 }
 
+async function getSubsrcibers(subscription) {
+	const emails = await Subscriber.find({
+		subscription: subscription,
+	})
+		.select('email')
+		.then((subscribers) => subscribers.map((subscriber) => subscriber.email));
+
+	return emails;
+}
+
 async function getSchedule(date) {
 	const week = getWeek(date) % 2 === 0 ? 'parni' : 'neparni';
 	const day = format(date, 'eeee', { locale, weekStartsOn: 2 });
@@ -143,11 +153,7 @@ exports.weeklyUpdate = async () => {
 		const notes = await getNotes(fromDate, toDate);
 		const exams = await getExams(fromDate, toDate);
 
-		const receivers = await User.find({
-			subscription: 'weekly',
-		})
-			.select('email')
-			.then((users) => users.map((user) => user.email));
+		const receivers = await getSubsrcibers('weekly');
 
 		receivers.forEach(async (receiver) => {
 			let info = await transporter.sendMail({
@@ -184,11 +190,7 @@ exports.changesUpdate = async () => {
 
 		if (changes.length < 1) return "No daily changes! Didn't send anything.";
 
-		const receivers = await User.find({
-			subscription: 'changes',
-		})
-			.select('email')
-			.then((users) => users.map((user) => user.email));
+		const receivers = await getSubsrcibers('changes');
 
 		for (let i = 0; i < changes.length; i++) {
 			if (!changes[i].substitution) {
@@ -234,11 +236,7 @@ exports.dailyExams = async () => {
 
 		if (exams.length < 1) return "No daily exams! Didn't send anything...";
 
-		const receivers = await User.find({
-			subscription: 'exams',
-		})
-			.select('email')
-			.then((users) => users.map((user) => user.email));
+		const receivers = await getSubsrcibers('exams');
 
 		receivers.forEach(async (receiver) => {
 			let info = await transporter.sendMail({
@@ -256,6 +254,77 @@ exports.dailyExams = async () => {
 		});
 
 		return 'Daily exams sent sucessfully';
+	} catch (error) {
+		console.error(error);
+	}
+};
+
+exports.subscriptionAdmin = async (email) => {
+	try {
+		let subscriber = await Subscriber.findOne({ email }).lean();
+		if (!subscriber) return false;
+
+		let info = await transporter.sendMail({
+			from: 'Raspored <raspored@dev-mario.xyz>',
+			to: email,
+			subject: `Pretplata na sadržaj - Školski planer`,
+			template: 'pretplatnici',
+			context: {
+				time: new Date().toUTCString(),
+				name: subscriber.name,
+				url: `subscribers/me/${subscriber.accessKey}`,
+			},
+		});
+		console.log(info.messageId);
+
+		return true;
+	} catch (error) {
+		console.error(error);
+	}
+};
+
+exports.subscriptionHello = async (email) => {
+	try {
+		let subscriber = await Subscriber.findOne({ email }).lean();
+		if (!subscriber) return false;
+
+		let info = await transporter.sendMail({
+			from: 'Raspored <raspored@dev-mario.xyz>',
+			to: email,
+			subject: `Pretplata na sadržaj - Školski planer`,
+			template: 'pretplatnici_hello',
+			context: {
+				time: new Date().toUTCString(),
+				name: subscriber.name,
+				url: `subscribers/me/${subscriber.accessKey}`,
+			},
+		});
+		console.log(info.messageId);
+
+		return true;
+	} catch (error) {
+		console.error(error);
+	}
+};
+
+exports.subscriptionBye = async (email) => {
+	try {
+		let subscriber = await Subscriber.findOne({ email }).lean();
+		if (!subscriber) return false;
+
+		let info = await transporter.sendMail({
+			from: 'Raspored <raspored@dev-mario.xyz>',
+			to: email,
+			subject: `Pretplata na sadržaj - Školski planer`,
+			template: 'pretplatnici_bye',
+			context: {
+				time: new Date().toUTCString(),
+				name: subscriber.name,
+			},
+		});
+		console.log(info.messageId);
+
+		return true;
 	} catch (error) {
 		console.error(error);
 	}

@@ -45,6 +45,7 @@ app.use('/api/exam', require('./routes/exams'));
 app.use('/api/changes', require('./routes/changes'));
 app.use('/api/breaks', require('./routes/breaks'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/subscribers', require('./routes/subscribers'));
 
 cron.schedule(
 	'00 12 * * sat',
