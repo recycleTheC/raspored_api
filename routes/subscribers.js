@@ -67,7 +67,7 @@ router.get('/:accessKey', async (req, res) => {
 
 	try {
 		if (!validateUUID(accessKey))
-			return res.json({ msg: 'Pogrešan pristupni ključ!' });
+			return res.status(400).json({ msg: 'Pogrešan pristupni ključ!' });
 
 		let subscriber = await Subscriber.findOne({ accessKey }).select(
 			'-accessKey'
