@@ -12,6 +12,15 @@ async function getNotes(date) {
 	return result;
 }
 
+async function getReminders() {
+	const result = Notes.find({ reminder: { $exists: true } }).populate({
+		path: 'classKey',
+		model: 'classes',
+		select: 'name',
+	});
+	return result;
+}
+
 // @route    POST api/notes
 // @desc     Create a note
 // @access   Private
@@ -67,7 +76,7 @@ router.post(
 // @desc     Get daily notes
 // @access   Public
 
-router.get('/:date', async (req, res) => {
+router.get('/date/:date', async (req, res) => {
 	const errors = validationResult(req);
 
 	if (!errors.isEmpty()) {
@@ -180,6 +189,29 @@ router.get('/class/:id', async (req, res) => {
 		let notes = await Notes.find({
 			classKey: req.params.id,
 		});
+
+		if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
+
+		res.json(notes);
+	} catch (err) {
+		console.error(err.message);
+		res.status(500).send('Server error');
+	}
+});
+
+// @route    GET api/notes/reminder
+// @desc     Get all notes
+// @access   Public
+
+router.get('/reminders', async (req, res) => {
+	const errors = validationResult(req);
+
+	if (!errors.isEmpty()) {
+		return res.status(400).json({ errors: errors.array() });
+	}
+
+	try {
+		let notes = await getReminders();
 
 		if (!notes) return res.json({ msg: 'Biljeske nisu pronadjene' });
 
