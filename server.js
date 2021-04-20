@@ -62,7 +62,7 @@ cron.schedule(
 );
 
 cron.schedule(
-	'00 15 * * sun-frid',
+	'00 15 * * sun-thu',
 	async () => {
 		try {
 			const update = await mail.changesUpdate();
