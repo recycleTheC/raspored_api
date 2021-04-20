@@ -8,7 +8,6 @@ const Schedule = require('../models/Schedule');
 const Breaks = require('../models/Breaks');
 const { addDays, format, getWeek, setHours } = require('date-fns');
 const locale = require('date-fns/locale/hr');
-const { get } = require('mongoose');
 
 // @route    POST api/class
 // @desc     Create a class
@@ -31,9 +30,16 @@ router.post(
 				teacher,
 			});
 
-			const _class = await newClass.save();
+			await newClass.save();
 
-			res.json(_class);
+			res.json(
+				await Classes.find()
+					.populate({
+						path: 'teacher',
+						model: 'teacher',
+					})
+					.sort('name')
+			);
 		} catch (err) {
 			console.error(err.message);
 			res.status(500).send('Server Error');
